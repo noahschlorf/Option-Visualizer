@@ -1,17 +1,31 @@
-Option-Visualizer
-Option-Visualizer is a Python-based tool designed to visualize the payoff of different option strategies.
+# Option-Visualizer
 
-Features
-Strategies: The repository provides classes to represent different option strategies. Currently, it supports:
+Option-Visualizer is a Python-based tool designed to help you visualize the payoff of different option strategies.
 
-Call Option
-Put Option
-Each strategy class has methods to calculate the payoff, maximum profit, maximum loss, and break-even point.
+## Features
 
-Visualization: The visualize.py script provides a GUI to select the strategy, input parameters like strike price and premium paid, and visualize the strategy's payoff using matplotlib.
+### Supported Strategies
+The repository provides classes to represent different option strategies. Currently, it supports:
 
-Usage
-Clone the repository.
-Install the required libraries.
-Run the visualize.py script.
-Use the GUI to select a strategy, input the required parameters, and visualize the payoff.
+- Call Option
+- Put Option
+
+Each strategy class comes with methods to calculate the payoff, maximum profit, maximum loss, and break-even point.
+
+### Visualization
+The `visualize.py` script offers a user-friendly GUI that allows you to:
+
+1. Select a strategy
+2. Input parameters such as strike price and premium paid
+3. Visualize the strategy's payoff using matplotlib.
+
+## Usage
+
+To get started, follow these steps:
+
+1. Clone the repository.
+2. Install the required libraries.
+3. Run the `visualize.py` script.
+4. Use the GUI to select a strategy, input the required parameters, and visualize the payoff.
+
+Enjoy exploring and visualizing different option strategies with Option-Visualizer!
