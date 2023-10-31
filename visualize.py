@@ -1,4 +1,4 @@
-from strategies import CallOption, PutOption
+from singleoption import BuyCallOption, BuyPutOption, SellCallOption, SellPutOption
 
 import tkinter as tk
 from tkinter import ttk
@@ -10,15 +10,17 @@ class StrategyVisualizer(tk.Tk):
     def __init__(self):
         super().__init__()
         self.title('Option Strategy Visualizer')
-        self.geometry('800x600')
+        self.geometry('800x900')
 
         # Dropdown menu for selecting the strategy
         self.strategy_label = ttk.Label(self, text="Select Strategy:")
         self.strategy_label.pack()
         self.selected_strategy = tk.StringVar()
-        self.strategies = {'Call Option': CallOption, 'Put Option':PutOption}  # Add more strategies as needed
+        self.strategies = {'Buy Call Option': BuyCallOption,'Sell Call Option':SellCallOption,'Buy Put Option':BuyPutOption, 'Sell Put Option':SellPutOption }  # Add more strategies as needed
         self.strategy_menu = ttk.Combobox(self, textvariable=self.selected_strategy, values=list(self.strategies.keys()))
         self.strategy_menu.pack()
+
+        #
 
         # Input for strike price
         self.strike_price_label = ttk.Label(self, text="Strike Price:")
@@ -27,14 +29,28 @@ class StrategyVisualizer(tk.Tk):
         self.strike_price_entry.pack()
 
         # Input for option price (premium paid)
-        self.premium_paid_label = ttk.Label(self, text="Option Price (Premium Paid):")
+        self.premium_paid_label = ttk.Label(self, text="Premium (Per Contract):")
         self.premium_paid_label.pack()
         self.premium_paid_entry = ttk.Entry(self)
         self.premium_paid_entry.pack()
 
+        # Input for number of contracts
+        self.number_of_contracts_label = ttk.Label(self, text="Number of Contracts:")
+        self.number_of_contracts_label.pack()
+        self.number_of_contracts_entry = ttk.Entry(self)
+        self.number_of_contracts_entry.pack()
+
+        # Input for current price of the underlying asset
+        self.current_price_label = ttk.Label(self, text="Current Price:")
+        self.current_price_label.pack()
+        self.current_price_entry = ttk.Entry(self)
+        self.current_price_entry.pack()
+
         # Button to plot graph
         self.plot_button = ttk.Button(self, text="Plot Strategy", command=self.plot_strategy)
         self.plot_button.pack()
+
+        #
 
         # Placeholder for matplotlib graph
         self.figure = plt.Figure(figsize=(6, 5), dpi=100)
@@ -53,18 +69,24 @@ class StrategyVisualizer(tk.Tk):
         # Get the parameters from the entries
         strike_price = float(self.strike_price_entry.get())
         premium_paid = float(self.premium_paid_entry.get())
+        number_of_contracts = int(self.number_of_contracts_entry.get())
+        current_price = float(self.current_price_entry.get())
+        
 
         # Create an instance of the strategy class
-        strategy = strategy_class(strike_price, premium_paid)
+        strategy = strategy_class(strike_price, premium_paid, number_of_contracts, current_price)
 
         # Assuming that each strategy class has a method to calculate the payoff
         stock_prices = np.linspace(0, strike_price*2, 100)
         payoff = strategy.calculate_payoff(stock_prices)
+        
 
         # Call the methods to calculate max profit, max loss, and break-even
         max_profit = strategy.calculate_max_profit()
         max_loss = strategy.calculate_max_loss()
         break_even = strategy.calculate_break_even()
+        current_value = strategy.calculate_current_value()
+        current_profit_loss = strategy.calculate_current_profit_loss()
 
         # Plot the strategy payoff
         self.ax.clear()
@@ -80,11 +102,15 @@ class StrategyVisualizer(tk.Tk):
         self.ax.text(0.05, 0.95, f'Max Profit: {"Unlimited" if max_profit == np.inf else max_profit}', transform=self.ax.transAxes)
         self.ax.text(0.05, 0.90, f'Max Loss: {max_loss}', transform=self.ax.transAxes)
         self.ax.text(0.05, 0.85, f'Break-even: {break_even}', transform=self.ax.transAxes)
+        self.ax.text(0.05, 0.80, f'Current Intrinsic Value: {round(current_value, 2)}', transform=self.ax.transAxes)
+        self.ax.text(0.05, 0.75, f'Current P/L: {round(current_profit_loss, 2)}', transform=self.ax.transAxes)
+
 
         #self.ax.axvline(x=break_even, color='green', linestyle='--', label='Break-even Price')
 
         #self.ax.legend(loc='lower left')
         self.canvas.draw()
+
 def add_space_before_capitals(text):
     # This function adds a space before each capital letter found in the input string
     new_text = ""
@@ -94,11 +120,6 @@ def add_space_before_capitals(text):
             new_text += " "
         new_text += char
     return new_text
-
-# Example usage with the string 'CallOption'
-formatted_string = add_space_before_capitals('CallOption')
-print(formatted_string) # This will print 'Call Option'
-
 
 if __name__ == "__main__":
     app = StrategyVisualizer()
