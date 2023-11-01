@@ -7,8 +7,8 @@ Option-Visualizer is a Python-based tool designed to help you visualize the payo
 ### Supported Strategies
 The repository provides classes to represent different option strategies. Currently, it supports:
 
-- Call Option
-- Put Option
+- Buying & Selling Call Options
+- Buying & Selling Put Option
 
 Each strategy class comes with methods to calculate the payoff, maximum profit, maximum loss, and break-even point.
 
