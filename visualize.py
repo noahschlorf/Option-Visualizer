@@ -1,4 +1,6 @@
 from singleoption import BuyCallOption, BuyPutOption, SellCallOption, SellPutOption
+from widgets import single_option_widgets
+from inputs import single_option_input
 
 import tkinter as tk
 from tkinter import ttk
@@ -15,48 +17,36 @@ class StrategyVisualizer(tk.Tk):
         # Dropdown menu for selecting the strategy
         self.strategy_label = ttk.Label(self, text="Select Strategy:")
         self.strategy_label.pack()
+        
         self.selected_strategy = tk.StringVar()
-        self.strategies = {'Buy Call Option': BuyCallOption,'Sell Call Option':SellCallOption,'Buy Put Option':BuyPutOption, 'Sell Put Option':SellPutOption }  # Add more strategies as needed
+        self.strategies = {
+            'Buy Call Option': BuyCallOption,
+            'Sell Call Option': SellCallOption,
+            'Buy Put Option': BuyPutOption, 
+            'Sell Put Option': SellPutOption
+        }
         self.strategy_menu = ttk.Combobox(self, textvariable=self.selected_strategy, values=list(self.strategies.keys()))
         self.strategy_menu.pack()
+        
+        # Bind the selection event to a method that handles the widget generation
+        self.strategy_menu.bind('<<ComboboxSelected>>', self.on_strategy_select)
 
-        #
-
-        # Input for strike price
-        self.strike_price_label = ttk.Label(self, text="Strike Price:")
-        self.strike_price_label.pack()
-        self.strike_price_entry = ttk.Entry(self)
-        self.strike_price_entry.pack()
-
-        # Input for option price (premium paid)
-        self.premium_paid_label = ttk.Label(self, text="Premium (Per Contract):")
-        self.premium_paid_label.pack()
-        self.premium_paid_entry = ttk.Entry(self)
-        self.premium_paid_entry.pack()
-
-        # Input for number of contracts
-        self.number_of_contracts_label = ttk.Label(self, text="Number of Contracts:")
-        self.number_of_contracts_label.pack()
-        self.number_of_contracts_entry = ttk.Entry(self)
-        self.number_of_contracts_entry.pack()
-
-        # Input for current price of the underlying asset
-        self.current_price_label = ttk.Label(self, text="Current Price:")
-        self.current_price_label.pack()
-        self.current_price_entry = ttk.Entry(self)
-        self.current_price_entry.pack()
-
-        # Button to plot graph
+    def on_strategy_select(self, event):
+        # Get the selected strategy name
+        selected_strategy_name = self.selected_strategy.get()
+        # Get the corresponding strategy class
+        strategy_class = self.strategies[selected_strategy_name]
+        # Now you can call your widget generation function
+        single_option_widgets(self)
+         # Button to plot graph
         self.plot_button = ttk.Button(self, text="Plot Strategy", command=self.plot_strategy)
         self.plot_button.pack()
-
-        #
-
         # Placeholder for matplotlib graph
         self.figure = plt.Figure(figsize=(6, 5), dpi=100)
         self.ax = self.figure.add_subplot(111)
         self.canvas = FigureCanvasTkAgg(self.figure, self)
         self.canvas.get_tk_widget().pack()
+    
 
     def plot_strategy(self):
         # Get the selected strategy class from the dropdown
@@ -65,21 +55,12 @@ class StrategyVisualizer(tk.Tk):
         if not strategy_class:
             tk.messagebox.showerror("Error", "Please select a valid strategy.")
             return
-
-        # Get the parameters from the entries
-        strike_price = float(self.strike_price_entry.get())
-        premium_paid = float(self.premium_paid_entry.get())
-        number_of_contracts = int(self.number_of_contracts_entry.get())
-        current_price = float(self.current_price_entry.get())
         
-
-        # Create an instance of the strategy class
-        strategy = strategy_class(strike_price, premium_paid, number_of_contracts, current_price)
+        strategy = single_option_input(self,strategy_class)
 
         # Assuming that each strategy class has a method to calculate the payoff
-        stock_prices = np.linspace(0, strike_price*2, 100)
+        stock_prices = np.linspace(0, self.strike_price*2, 100)
         payoff = strategy.calculate_payoff(stock_prices)
-        
 
         # Call the methods to calculate max profit, max loss, and break-even
         max_profit = strategy.calculate_max_profit()
@@ -105,10 +86,6 @@ class StrategyVisualizer(tk.Tk):
         self.ax.text(0.05, 0.80, f'Current Intrinsic Value: {round(current_value, 2)}', transform=self.ax.transAxes)
         self.ax.text(0.05, 0.75, f'Current P/L: {round(current_profit_loss, 2)}', transform=self.ax.transAxes)
 
-
-        #self.ax.axvline(x=break_even, color='green', linestyle='--', label='Break-even Price')
-
-        #self.ax.legend(loc='lower left')
         self.canvas.draw()
 
 def add_space_before_capitals(text):
