@@ -1,6 +1,7 @@
-from singleoption import BuyCallOption, BuyPutOption, SellCallOption, SellPutOption
-from widgets import single_option_widgets
-from inputs import single_option_input
+from strategies.singleoption import BuyCallOption, BuyPutOption, SellCallOption, SellPutOption
+from strategies.spreads import BearCallSpread
+from widgets import single_option_widgets, bear_call_spread_widgets
+from inputs import single_option_input, bear_call_spread_input
 
 import tkinter as tk
 from tkinter import ttk
@@ -11,6 +12,7 @@ from matplotlib.backends.backend_tkagg import FigureCanvasTkAgg
 class StrategyVisualizer(tk.Tk):
     def __init__(self):
         super().__init__()
+        self.current_widgets = []
         self.title('Option Strategy Visualizer')
         self.geometry('800x900')
 
@@ -19,11 +21,13 @@ class StrategyVisualizer(tk.Tk):
         self.strategy_label.pack()
         
         self.selected_strategy = tk.StringVar()
+        # List of total strategies the user can pick from
         self.strategies = {
             'Buy Call Option': BuyCallOption,
             'Sell Call Option': SellCallOption,
             'Buy Put Option': BuyPutOption, 
-            'Sell Put Option': SellPutOption
+            'Sell Put Option': SellPutOption,
+            'Bear Call Spread': BearCallSpread
         }
         self.strategy_menu = ttk.Combobox(self, textvariable=self.selected_strategy, values=list(self.strategies.keys()))
         self.strategy_menu.pack()
@@ -31,13 +35,6 @@ class StrategyVisualizer(tk.Tk):
         # Bind the selection event to a method that handles the widget generation
         self.strategy_menu.bind('<<ComboboxSelected>>', self.on_strategy_select)
 
-    def on_strategy_select(self, event):
-        # Get the selected strategy name
-        selected_strategy_name = self.selected_strategy.get()
-        # Get the corresponding strategy class
-        strategy_class = self.strategies[selected_strategy_name]
-        # Now you can call your widget generation function
-        single_option_widgets(self)
          # Button to plot graph
         self.plot_button = ttk.Button(self, text="Plot Strategy", command=self.plot_strategy)
         self.plot_button.pack()
@@ -46,7 +43,23 @@ class StrategyVisualizer(tk.Tk):
         self.ax = self.figure.add_subplot(111)
         self.canvas = FigureCanvasTkAgg(self.figure, self)
         self.canvas.get_tk_widget().pack()
+
+    def clear_widgets(self):
+        # Clear all the widgets currently displayed
+        for widget in getattr(self, 'current_widgets', []):
+            widget.destroy()
+        self.current_widgets = []  # Reset the widget list
     
+    def on_strategy_select(self, event):
+        self.clear_widgets()
+
+        # Use a separate condition for each strategy instead of a compound condition
+        selected_strategy = self.selected_strategy.get()
+        if selected_strategy == 'Buy Call Option' or selected_strategy == 'Sell Call Option' or selected_strategy == 'Buy Put Option' or selected_strategy == 'Sell Put Option':
+            single_option_widgets(self)
+        elif selected_strategy == 'Bear Call Spread':
+            bear_call_spread_widgets(self)
+
 
     def plot_strategy(self):
         # Get the selected strategy class from the dropdown
@@ -55,12 +68,16 @@ class StrategyVisualizer(tk.Tk):
         if not strategy_class:
             tk.messagebox.showerror("Error", "Please select a valid strategy.")
             return
-        
-        strategy = single_option_input(self,strategy_class)
 
-        # Assuming that each strategy class has a method to calculate the payoff
-        stock_prices = np.linspace(0, self.strike_price*2, 100)
-        payoff = strategy.calculate_payoff(stock_prices)
+        if self.selected_strategy.get() in ('Buy Call Option', 'Sell Call Option', 'Buy Put Option', 'Sell Put Option'):
+            strategy = single_option_input(self, strategy_class)
+            stock_prices = np.linspace(0, self.strike_price*2, 100)
+            payoff = strategy.calculate_payoff(stock_prices)
+        if self.selected_strategy.get() == 'Bear Call Spread':
+            strategy = bear_call_spread_input(self, strategy_class)
+            stock_prices = np.linspace(0, strategy.short_strike * 2, 100) # Adjusted to use the short_strike attribute from the strategy instance
+            payoff = strategy.calculate_payoff(stock_prices)
+        
 
         # Call the methods to calculate max profit, max loss, and break-even
         max_profit = strategy.calculate_max_profit()
