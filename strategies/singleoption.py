@@ -8,13 +8,13 @@ class BuyCallOption:
         self.current_price = current_price
 
     def calculate_payoff(self, stock_prices):
-        return self.number_of_contracts * (np.maximum(stock_prices - self.strike_price, 0) - self.premium_paid)
+        return self.number_of_contracts * (np.maximum(stock_prices - self.strike_price, 0) - self.premium_paid) * 100
 
     def calculate_max_profit(self):
         return np.inf
 
     def calculate_max_loss(self):
-        return -self.premium_paid * self.number_of_contracts
+        return -self.premium_paid * self.number_of_contracts * 100
 
     def calculate_break_even(self):
         return self.strike_price + self.premium_paid
@@ -34,10 +34,10 @@ class BuyPutOption:
         self.current_price = current_price 
 
     def calculate_payoff(self, stock_prices):
-        return self.number_of_contracts * (np.maximum(self.strike_price - stock_prices, 0) - self.premium_paid)
+        return self.number_of_contracts * (np.maximum(self.strike_price - stock_prices, 0) - self.premium_paid) * 100
 
     def calculate_max_profit(self):
-        return self.number_of_contracts * (self.strike_price - self.premium_paid)
+        return self.number_of_contracts * (self.strike_price - self.premium_paid) * 100
 
     def calculate_max_loss(self):
         return -self.premium_paid * self.number_of_contracts
@@ -60,10 +60,10 @@ class SellCallOption:
         self.current_price = current_price
 
     def calculate_payoff(self, stock_prices):
-        return self.number_of_contracts * (self.premium_received - np.maximum(stock_prices - self.strike_price, 0))
+        return self.number_of_contracts * (self.premium_received - np.maximum(stock_prices - self.strike_price, 0)) * 100
 
     def calculate_max_profit(self):
-        return self.premium_received * self.number_of_contracts
+        return self.premium_received * self.number_of_contracts * 100
 
     def calculate_max_loss(self):
         return -np.inf
@@ -86,13 +86,13 @@ class SellPutOption:
         self.current_price = current_price
 
     def calculate_payoff(self, stock_prices):
-        return self.number_of_contracts * (self.premium_received - np.maximum(self.strike_price - stock_prices, 0))
+        return self.number_of_contracts * (self.premium_received - np.maximum(self.strike_price - stock_prices, 0)) * 100
 
     def calculate_max_profit(self):
         return self.premium_received * self.number_of_contracts
 
     def calculate_max_loss(self):
-        return self.number_of_contracts * (self.strike_price - self.premium_received)
+        return self.number_of_contracts * (self.strike_price - self.premium_received) * 100
 
     def calculate_break_even(self):
         return self.strike_price - self.premium_received

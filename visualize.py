@@ -75,11 +75,10 @@ class StrategyVisualizer(tk.Tk):
             payoff = strategy.calculate_payoff(stock_prices)
         if self.selected_strategy.get() == 'Bear Call Spread':
             strategy = bear_call_spread_input(self, strategy_class)
-            stock_prices = np.linspace(0, strategy.short_strike * 2, 100) # Adjusted to use the short_strike attribute from the strategy instance
+            stock_prices = np.linspace(0, strategy.short_strike * 2, 100) 
             payoff = strategy.calculate_payoff(stock_prices)
         
 
-        # Call the methods to calculate max profit, max loss, and break-even
         max_profit = strategy.calculate_max_profit()
         max_loss = strategy.calculate_max_loss()
         break_even = strategy.calculate_break_even()
@@ -89,7 +88,8 @@ class StrategyVisualizer(tk.Tk):
         # Plot the strategy payoff
         self.ax.clear()
         self.ax.plot(stock_prices, payoff, label=f'{strategy_class.__name__} Payoff')
-        self.ax.axhline(0, color='lightgray', linestyle='--')  # P/L 0 line
+        # 0 line
+        self.ax.axhline(0, color='lightgray', linestyle='--') 
         
         self.ax.set_title(f'{add_space_before_capitals(strategy_class.__name__)} Payoff')
         self.ax.set_xlabel('Stock Price')
