@@ -9,8 +9,18 @@ The repository provides classes to represent different option strategies. Curren
 
 - Buying & Selling Call Options
 - Buying & Selling Put Option
+- Bear Call Spread
+- Bull Call Spread
 
-Each strategy class comes with methods to calculate the payoff, maximum profit, maximum loss, and break-even point.
+Coming Soon....
+- Bear Put Spread
+- Bull Put Spread
+- Long Call Butterfly Spread
+- Short Call Butterfly Spread
+- Long Put Butterfly Spread
+- Short Put Butterfly Spread
+
+Each strategy class comes with methods to calculate the maximum profit, maximum loss, and break-even point.
 
 ### Visualization
 The `visualize.py` script offers a user-friendly GUI that allows you to:
