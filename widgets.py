@@ -43,7 +43,7 @@ def single_option_widgets(parent):
             parent.number_of_contracts_label, parent.number_of_contracts_entry,
             parent.current_price_label, parent.current_price_entry)
 
-def bear_call_spread_widgets(parent):
+def spread_widgets(parent):
     if not hasattr(parent, 'current_widgets'):
         parent.current_widgets = []
 

@@ -1,7 +1,7 @@
 from strategies.singleoption import BuyCallOption, BuyPutOption, SellCallOption, SellPutOption
-from strategies.spreads import BearCallSpread
-from widgets import single_option_widgets, bear_call_spread_widgets
-from inputs import single_option_input, bear_call_spread_input
+from strategies.spreads import BearCallSpread, BullCallSpread
+from widgets import single_option_widgets, spread_widgets
+from inputs import single_option_input, spread_input
 
 import tkinter as tk
 from tkinter import ttk
@@ -19,7 +19,6 @@ class StrategyVisualizer(tk.Tk):
         # Dropdown menu for selecting the strategy
         self.strategy_label = ttk.Label(self, text="Select Strategy:")
         self.strategy_label.pack()
-        
         self.selected_strategy = tk.StringVar()
         # List of total strategies the user can pick from
         self.strategies = {
@@ -27,7 +26,8 @@ class StrategyVisualizer(tk.Tk):
             'Sell Call Option': SellCallOption,
             'Buy Put Option': BuyPutOption, 
             'Sell Put Option': SellPutOption,
-            'Bear Call Spread': BearCallSpread
+            'Bear Call Spread': BearCallSpread,
+            'Bull Call Spread': BullCallSpread
         }
         self.strategy_menu = ttk.Combobox(self, textvariable=self.selected_strategy, values=list(self.strategies.keys()))
         self.strategy_menu.pack()
@@ -57,8 +57,8 @@ class StrategyVisualizer(tk.Tk):
         selected_strategy = self.selected_strategy.get()
         if selected_strategy == 'Buy Call Option' or selected_strategy == 'Sell Call Option' or selected_strategy == 'Buy Put Option' or selected_strategy == 'Sell Put Option':
             single_option_widgets(self)
-        elif selected_strategy == 'Bear Call Spread':
-            bear_call_spread_widgets(self)
+        elif selected_strategy == 'Bear Call Spread' or selected_strategy == 'Bull Call Spread':
+            spread_widgets(self)
 
 
     def plot_strategy(self):
@@ -73,23 +73,22 @@ class StrategyVisualizer(tk.Tk):
             strategy = single_option_input(self, strategy_class)
             stock_prices = np.linspace(0, self.strike_price*2, 100)
             payoff = strategy.calculate_payoff(stock_prices)
-        if self.selected_strategy.get() == 'Bear Call Spread':
-            strategy = bear_call_spread_input(self, strategy_class)
-            stock_prices = np.linspace(0, strategy.short_strike * 2, 100) 
+        if self.selected_strategy.get() in ('Bear Call Spread', 'Bull Call Spread'):
+            strategy = spread_input(self, strategy_class)
+            upper_limit = (strategy.short_strike if self.selected_strategy.get() == 'Bear Call Spread' else strategy.buy_call_strike) * 2
+            stock_prices = np.linspace(0, upper_limit, 100)
             payoff = strategy.calculate_payoff(stock_prices)
-        
 
+        # Call the methods to calculate max profit, max loss, and break-even
         max_profit = strategy.calculate_max_profit()
         max_loss = strategy.calculate_max_loss()
         break_even = strategy.calculate_break_even()
-        current_value = strategy.calculate_current_value()
-        current_profit_loss = strategy.calculate_current_profit_loss()
+        #current_profit_loss = strategy.calculate_current_profit_loss()
 
         # Plot the strategy payoff
         self.ax.clear()
         self.ax.plot(stock_prices, payoff, label=f'{strategy_class.__name__} Payoff')
-        # 0 line
-        self.ax.axhline(0, color='lightgray', linestyle='--') 
+        self.ax.axhline(0, color='lightgray', linestyle='--')  # P/L 0 line
         
         self.ax.set_title(f'{add_space_before_capitals(strategy_class.__name__)} Payoff')
         self.ax.set_xlabel('Stock Price')
@@ -97,11 +96,11 @@ class StrategyVisualizer(tk.Tk):
 
         # Annotate the max profit, max loss, and break-even on the plot
         # Adjust positions and formatting as necessary
-        self.ax.text(0.05, 0.95, f'Max Profit: {"Unlimited" if max_profit == np.inf else max_profit}', transform=self.ax.transAxes)
-        self.ax.text(0.05, 0.90, f'Max Loss: {max_loss}', transform=self.ax.transAxes)
-        self.ax.text(0.05, 0.85, f'Break-even: {break_even}', transform=self.ax.transAxes)
-        self.ax.text(0.05, 0.80, f'Current Intrinsic Value: {round(current_value, 2)}', transform=self.ax.transAxes)
-        self.ax.text(0.05, 0.75, f'Current P/L: {round(current_profit_loss, 2)}', transform=self.ax.transAxes)
+        self.ax.text(0.05, 0.95, f'Max Profit: {"Unlimited" if max_profit == np.inf else round(max_profit, 2)}', transform=self.ax.transAxes)
+        self.ax.text(0.05, 0.90, f'Max Loss: {round(max_loss, 2)}', transform=self.ax.transAxes)
+        self.ax.text(0.05, 0.85, f'Break-even: {round(break_even, 2)}', transform=self.ax.transAxes)
+        #self.ax.text(0.05, 0.75, f'Current P/L: {round(current_profit_loss, 2)}', transform=self.ax.transAxes)
+
 
         self.canvas.draw()
 
