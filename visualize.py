@@ -1,5 +1,5 @@
 from strategies.singleoption import BuyCallOption, BuyPutOption, SellCallOption, SellPutOption
-from strategies.spreads import BearCallSpread, BullCallSpread
+from strategies.spreads import BearCallSpread, BullCallSpread, BearPutSpread
 from widgets import single_option_widgets, spread_widgets
 from inputs import single_option_input, spread_input
 
@@ -27,7 +27,8 @@ class StrategyVisualizer(tk.Tk):
             'Buy Put Option': BuyPutOption, 
             'Sell Put Option': SellPutOption,
             'Bear Call Spread': BearCallSpread,
-            'Bull Call Spread': BullCallSpread
+            'Bull Call Spread': BullCallSpread,
+            'Bear Put Spread': BearPutSpread
         }
         self.strategy_menu = ttk.Combobox(self, textvariable=self.selected_strategy, values=list(self.strategies.keys()))
         self.strategy_menu.pack()
@@ -57,7 +58,7 @@ class StrategyVisualizer(tk.Tk):
         selected_strategy = self.selected_strategy.get()
         if selected_strategy == 'Buy Call Option' or selected_strategy == 'Sell Call Option' or selected_strategy == 'Buy Put Option' or selected_strategy == 'Sell Put Option':
             single_option_widgets(self)
-        elif selected_strategy == 'Bear Call Spread' or selected_strategy == 'Bull Call Spread':
+        elif selected_strategy == 'Bear Call Spread' or selected_strategy == 'Bull Call Spread' or selected_strategy == 'Bear Put Spread':
             spread_widgets(self)
 
 
@@ -74,12 +75,21 @@ class StrategyVisualizer(tk.Tk):
             stock_prices = np.linspace(0, self.strike_price*2, 100)
             payoff = strategy.calculate_payoff(stock_prices)
             current_profit_loss = strategy.calculate_current_profit_loss()
-        if self.selected_strategy.get() in ('Bear Call Spread', 'Bull Call Spread'):
+        if self.selected_strategy.get() in ('Bear Call Spread', 'Bull Call Spread', 'Bear Put Spread'):
             strategy = spread_input(self, strategy_class)
-            upper_limit = (strategy.short_strike if self.selected_strategy.get() == 'Bear Call Spread' else strategy.buy_call_strike) * 2
-            stock_prices = np.linspace(0, upper_limit, 100)
-            payoff = strategy.calculate_payoff(stock_prices)
+            if isinstance(strategy, BearCallSpread):
+                lower_limit = strategy.short_strike - (strategy.short_strike - strategy.long_strike)
+                upper_limit = strategy.long_strike + (strategy.short_strike - strategy.long_strike)
+            elif isinstance(strategy, BullCallSpread):
+                lower_limit = strategy.buy_call_strike - (strategy.sell_call_strike - strategy.buy_call_strike)
+                upper_limit = strategy.sell_call_strike + (strategy.sell_call_strike - strategy.buy_call_strike)
+            elif isinstance(strategy, BearPutSpread):
+                lower_limit = strategy.buy_put_strike - (strategy.buy_put_strike - strategy.sell_put_strike)
+                upper_limit = strategy.sell_put_strike + (strategy.buy_put_strike - strategy.sell_put_strike)
 
+            stock_prices = np.linspace(lower_limit-20, upper_limit+20, 100)
+            payoff = strategy.calculate_payoff(stock_prices)
+                
         # Call the methods to calculate max profit, max loss, and break-even
         max_profit = strategy.calculate_max_profit()
         max_loss = strategy.calculate_max_loss()
