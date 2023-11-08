@@ -11,10 +11,10 @@ The repository provides classes to represent different option strategies. Curren
 - Buying & Selling Put Option
 - Bear Call Spread
 - Bull Call Spread
-
-Coming Soon....
 - Bear Put Spread
 - Bull Put Spread
+
+Coming Soon....
 - Long Call Butterfly Spread
 - Short Call Butterfly Spread
 - Long Put Butterfly Spread
