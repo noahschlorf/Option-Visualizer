@@ -1,5 +1,5 @@
 from strategies.singleoption import BuyCallOption, BuyPutOption, SellCallOption, SellPutOption
-from strategies.spreads import BearCallSpread, BullCallSpread, BearPutSpread
+from strategies.spreads import BearCallSpread, BullCallSpread, BearPutSpread, BullPutSpread
 from widgets import single_option_widgets, spread_widgets
 from inputs import single_option_input, spread_input
 
@@ -28,7 +28,8 @@ class StrategyVisualizer(tk.Tk):
             'Sell Put Option': SellPutOption,
             'Bear Call Spread': BearCallSpread,
             'Bull Call Spread': BullCallSpread,
-            'Bear Put Spread': BearPutSpread
+            'Bear Put Spread': BearPutSpread,
+            'Bull Put Spread': BullPutSpread
         }
         self.strategy_menu = ttk.Combobox(self, textvariable=self.selected_strategy, values=list(self.strategies.keys()))
         self.strategy_menu.pack()
@@ -58,7 +59,7 @@ class StrategyVisualizer(tk.Tk):
         selected_strategy = self.selected_strategy.get()
         if selected_strategy == 'Buy Call Option' or selected_strategy == 'Sell Call Option' or selected_strategy == 'Buy Put Option' or selected_strategy == 'Sell Put Option':
             single_option_widgets(self)
-        elif selected_strategy == 'Bear Call Spread' or selected_strategy == 'Bull Call Spread' or selected_strategy == 'Bear Put Spread':
+        elif selected_strategy == 'Bear Call Spread' or selected_strategy == 'Bull Call Spread' or selected_strategy == 'Bear Put Spread' or selected_strategy == 'Bull Put Spread':
             spread_widgets(self)
 
 
@@ -75,7 +76,7 @@ class StrategyVisualizer(tk.Tk):
             stock_prices = np.linspace(0, self.strike_price*2, 100)
             payoff = strategy.calculate_payoff(stock_prices)
             current_profit_loss = strategy.calculate_current_profit_loss()
-        if self.selected_strategy.get() in ('Bear Call Spread', 'Bull Call Spread', 'Bear Put Spread'):
+        if self.selected_strategy.get() in ('Bear Call Spread', 'Bull Call Spread', 'Bear Put Spread', 'Bull Put Spread'):
             strategy = spread_input(self, strategy_class)
             if isinstance(strategy, BearCallSpread):
                 lower_limit = strategy.short_strike - (strategy.short_strike - strategy.long_strike)
@@ -86,7 +87,10 @@ class StrategyVisualizer(tk.Tk):
             elif isinstance(strategy, BearPutSpread):
                 lower_limit = strategy.buy_put_strike - (strategy.buy_put_strike - strategy.sell_put_strike)
                 upper_limit = strategy.sell_put_strike + (strategy.buy_put_strike - strategy.sell_put_strike)
-
+            elif isinstance(strategy, BullPutSpread):
+                lower_limit = strategy.buy_put_strike - (strategy.sell_put_strike - strategy.buy_put_strike)
+                upper_limit = strategy.sell_put_strike + (strategy.sell_put_strike - strategy.buy_put_strike)
+                
             stock_prices = np.linspace(lower_limit-20, upper_limit+20, 100)
             payoff = strategy.calculate_payoff(stock_prices)
                 
