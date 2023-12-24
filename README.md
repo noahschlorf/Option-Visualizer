@@ -14,12 +14,6 @@ The repository provides classes to represent different option strategies. Curren
 - Bear Put Spread
 - Bull Put Spread
 
-Coming Soon....
-- Long Call Butterfly Spread
-- Short Call Butterfly Spread
-- Long Put Butterfly Spread
-- Short Put Butterfly Spread
-
 Each strategy class comes with methods to calculate the maximum profit, maximum loss, and break-even point.
 
 ### Visualization
