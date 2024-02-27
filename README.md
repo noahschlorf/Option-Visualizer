@@ -30,6 +30,6 @@ To get started, follow these steps:
 
 Enjoy exploring and visualizing different option strategies with Option-Visualizer!
 
-# Example outout
+# Example output
 
 ![Output](screenshot.png)
