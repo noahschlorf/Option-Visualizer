@@ -29,3 +29,7 @@ To get started, follow these steps:
 4. Use the GUI to select a strategy, input the required parameters, and visualize the payoff.
 
 Enjoy exploring and visualizing different option strategies with Option-Visualizer!
+
+# Example outout
+
+![Output](screenshot.png)
